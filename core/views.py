@@ -3,10 +3,28 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
+from .models import Movie
+
 # Create your views here.
 @login_required(login_url='login')
 def index (request):
-    return render(request, 'index.html')
+      movies = Movie.objects.all() # Fetch all movies from the database
+
+      featured_movie = None # Initialize as None
+      if movies.exists(): # Only try to get a featured movie if there are movies
+        # Option 1: Get the first movie (simple)
+        featured_movie = movies.first()
+        # Option 2: Get a random movie (requires more than one movie in DB, can be slower for large DBs)
+        # from django.db.models import Count # If you choose this, add this import at the top
+        # featured_movie = Movie.objects.annotate(num_movies=Count('id')).order_by('?').first() # A more robust random
+        # Option 3: Get a specific movie by a field, e.g., Movie.objects.get(title="Your Featured Movie Title")
+        # Be careful with .get() if the object might not exist; use .filter().first() instead.
+
+      context = {
+        'movies' : movies, # Pass the QuerySet of all movies
+        'featured_movie': featured_movie, # Pass the single featured movie
+    }
+      return render(request, 'index.html', context)
     
 def login(request):
     if request.method == 'POST':
