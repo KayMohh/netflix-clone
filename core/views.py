@@ -12,19 +12,74 @@ def index (request):
 
       featured_movie = None # Initialize as None
       if movies.exists(): # Only try to get a featured movie if there are movies
-        # Option 1: Get the first movie (simple)
         featured_movie = movies.first()
-        # Option 2: Get a random movie (requires more than one movie in DB, can be slower for large DBs)
-        # from django.db.models import Count # If you choose this, add this import at the top
-        # featured_movie = Movie.objects.annotate(num_movies=Count('id')).order_by('?').first() # A more robust random
-        # Option 3: Get a specific movie by a field, e.g., Movie.objects.get(title="Your Featured Movie Title")
-        # Be careful with .get() if the object might not exist; use .filter().first() instead.
-
+       
       context = {
         'movies' : movies, # Pass the QuerySet of all movies
         'featured_movie': featured_movie, # Pass the single featured movie
     }
       return render(request, 'index.html', context)
+
+# @login_required(login_url='login')
+# def genre(request, pk):
+#     movie_genre = pk
+#     movies = Movie.objects.filter(genre=movie_genre)
+
+#     context = {
+#         'movies': movies,
+#         'movie_genre': movie_genre,
+#     }
+#     return render(request, 'genre.html', context)
+
+# @login_required(login_url='login')
+# def search(request):
+#     if request.method == 'POST':
+#         search_term = request.POST['search_term']
+#         movies = Movie.objects.filter(title__icontains=search_term)
+
+#         context = {
+#             'movies': movies,
+#             'search_term': search_term,
+#         }
+#         return render(request, 'search.html', context)
+#     else:
+#         return redirect('/')
+
+# @login_required(login_url='login')
+# def my_list(request):
+
+#     movie_list = MovieList.objects.filter(owner_user=request.user)
+#     user_movie_list = []
+
+#     for movie in movie_list:
+#         user_movie_list.append(movie.movie)
+
+#     context = {
+#         'movies': user_movie_list
+#     }
+#     return render(request, 'my_list.html', context)
+
+
+# @login_required(login_url='login')
+# def add_to_list(request):
+#     if request.method == 'POST':
+#         movie_url_id = request.POST.get('movie_id')
+#         uuid_pattern = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+#         match = re.search(uuid_pattern, movie_url_id)
+#         movie_id = match.group() if match else None
+
+#         movie = get_object_or_404(Movie, uu_id=movie_id)
+#         movie_list, created = MovieList.objects.get_or_create(owner_user=request.user, movie=movie)
+
+#         if created:
+#             response_data = {'status': 'success', 'message': 'Added ✓'}
+#         else:
+#             response_data = {'status': 'info', 'message': 'Movie already in list'}
+
+#         return JsonResponse(response_data)
+#     else:
+#         # return error
+#         return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
     
 def login(request):
     if request.method == 'POST':
@@ -79,3 +134,8 @@ def signup(request):
             return redirect('signup')
     else:
         return render (request, 'signup.html')
+
+@login_required(login_url='login')
+def logout(request):
+    auth.logout(request)
+    return redirect('login')
