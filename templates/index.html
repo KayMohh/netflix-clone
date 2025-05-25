@@ -154,6 +154,30 @@
                 hideModal();
             }
         }
+        function addItemToList() {
+            const modal = document.getElementById('movieModal')
+            var movieID = modal.querySelector('.modal-content a').href;
+
+            $.ajax({
+                url: "{% url 'add-to-list' %}",
+                type: "POST",
+                data: {
+                    movie_id: movieID,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (data) {
+                    $('#addToListButton').text(data.message);
+
+                    $('#addToListButton').prop('disabled', true);
+
+                    console.log("Item added to list!");
+                },
+                error: function (xhr, errmsg, err) {
+
+                    console.error("Error adding item to list: " + errmsg);
+                }
+            });
+        }
     </script>
 </body>
 
